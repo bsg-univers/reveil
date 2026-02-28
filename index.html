@@ -195,11 +195,14 @@ height:200px;
 </div>
 
 <script>
+
 let totalTime=0;
 let remainingTime=0;
 let interval;
 let audio;
-
+audio = new Audio(type + ".wav");
+audio.volume = 0.8;
+audio.play();
 function startTimer(minutes){
 clearInterval(interval);
 remainingTime=minutes*60;
@@ -241,11 +244,21 @@ let progress=remainingTime/totalTime;
 circle.style.strokeDashoffset=circumference*(1-progress);
 }
 
-function playSound(){
-let type=document.getElementById("soundSelect").value;
-audio=new Audio(type+".mp3");
-audio.play();
-setTimeout(()=>{audio.pause();},10000);
+function playSound() {
+    const type = document.getElementById("soundSelect").value;
+    const file = type + ".wav";
+
+    audio = new Audio(file);
+    audio.volume = 0.8;
+
+    audio.play().catch(err => {
+        console.log("Erreur audio :", err);
+    });
+
+    setTimeout(() => {
+        audio.pause();
+        audio.currentTime = 0;
+    }, 10000);
 }
 
 function finishAnimation(){
