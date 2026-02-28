@@ -176,6 +176,7 @@
         const hint = document.getElementById('hint');
         const alarm = document.getElementById('alarm-sound');
         const totalDash = 565;
+        let audioUnlocked = false;
         alarm.playbackRate = 1;
 
         let timerOptions = [10, 15, 20, 30];
@@ -210,27 +211,38 @@
         }
 
         function startTimer(minutes) {
-            stopAlarm(); // Arrête une éventuelle alarme en cours
+    clearInterval(countdown);
+    stopAlarm();
+
+    // 🔓 Déverrouillage audio au premier clic
+    if (!audioUnlocked) {
+        alarm.play().then(() => {
+            alarm.pause();
+            alarm.currentTime = 0;
+            audioUnlocked = true;
+        }).catch(() => {});
+    }
+
+    const seconds = minutes * 60;
+    const then = Date.now() + seconds * 1000;
+
+    updateDisplay(seconds);
+    updateCircle(1);
+    hint.textContent = "";
+
+    countdown = setInterval(() => {
+        const secondsLeft = Math.round((then - Date.now()) / 1000);
+
+        if (secondsLeft <= 0) {
             clearInterval(countdown);
-            
-            const seconds = minutes * 60;
-            const then = Date.now() + seconds * 1000;
-
-            updateDisplay(seconds);
-            updateCircle(1);
-            hint.textContent = "";
-
-            countdown = setInterval(() => {
-                const secondsLeft = Math.round((then - Date.now()) / 1000);
-                if (secondsLeft < 0) {
-                    clearInterval(countdown);
-                    playAlarm();
-                    return;
-                }
-                updateDisplay(secondsLeft);
-                updateCircle(secondsLeft / seconds);
-            }, 1000);
+            playAlarm();
+            return;
         }
+
+        updateDisplay(secondsLeft);
+        updateCircle(secondsLeft / seconds);
+    }, 1000);
+}
 
         function updateDisplay(seconds) {
             const mins = Math.floor(seconds / 60);
@@ -243,15 +255,14 @@
         }
 
 function playAlarm() {
-    if (!alarm.paused) return; // Empêche double lecture
 
     alarm.pause();
     alarm.currentTime = 0;
-    alarm.playbackRate = 1;   // Force vitesse normale
     alarm.volume = 1;
+    alarm.playbackRate = 1;
 
     alarm.play().catch(err => {
-        console.log("Erreur lecture :", err);
+        console.log("Lecture bloquée :", err);
     });
 
     document.querySelector('.timer-container').classList.add('ringing');
