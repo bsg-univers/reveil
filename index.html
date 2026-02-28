@@ -2,205 +2,267 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mon Réveil</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f8c8dc">
+<link rel="manifest" href="manifest.json">
+<title>Réveil</title>
 
 <style>
-body {
-    margin: 0;
-    font-family: "Segoe UI", sans-serif;
-    background: linear-gradient(135deg, #fceff9, #e0f7fa);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+:root{
+--bg1:#fdfbfb;
+--bg2:#ebedee;
+--card:#ffffff;
+--accent:#f8c8dc;
+--circle:#c7f0db;
+--text:#333;
 }
 
-.container {
-    background: white;
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.1);
-    text-align: center;
-    width: 350px;
+body.dark{
+--bg1:#1e1f26;
+--bg2:#2a2c35;
+--card:#2f3240;
+--accent:#ff8fb1;
+--circle:#7de2c3;
+--text:#f1f1f1;
 }
 
-h1 {
-    margin-bottom: 25px;
-    color: #555;
+body{
+margin:0;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+background:linear-gradient(160deg,var(--bg1),var(--bg2));
+color:var(--text);
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+transition:0.4s;
 }
 
-.buttons button {
-    margin: 5px;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 12px;
-    background: #d0f0fd;
-    cursor: pointer;
-    transition: 0.3s;
+.container{
+width:95%;
+max-width:420px;
+background:var(--card);
+border-radius:28px;
+padding:25px;
+box-shadow:0 25px 60px rgba(0,0,0,0.15);
+text-align:center;
 }
 
-.buttons button:hover {
-    background: #aee3f7;
+.circle-wrapper{
+margin-top:10px;
+position:relative;
+width:240px;
+height:240px;
+margin-left:auto;
+margin-right:auto;
 }
 
-.custom-input {
-    margin-top: 15px;
+svg{
+transform:rotate(-90deg);
 }
 
-input {
-    padding: 8px;
-    width: 80px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
+circle{
+fill:none;
+stroke-width:12;
+stroke-linecap:round;
 }
 
-.start-btn {
-    margin-top: 10px;
-    padding: 8px 15px;
-    border-radius: 10px;
-    border: none;
-    background: #ffd6e8;
-    cursor: pointer;
+.bg{
+stroke:rgba(0,0,0,0.05);
 }
 
-.start-btn:hover {
-    background: #ffb3d1;
+.progress{
+stroke:var(--circle);
+stroke-dasharray:690;
+stroke-dashoffset:690;
+transition:stroke-dashoffset 1s linear;
 }
 
-.circle-container {
-    margin-top: 25px;
-    position: relative;
-    width: 150px;
-    height: 150px;
-    margin-left: auto;
-    margin-right: auto;
+.center-flower{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+font-size:55px;
+opacity:0.25;
+transition:0.6s ease;
 }
 
-svg {
-    transform: rotate(-90deg);
+.center-flower.animate{
+transform:translate(-50%,-50%) scale(1.8);
+opacity:0.5;
 }
 
-circle {
-    fill: none;
-    stroke-width: 10;
-    stroke-linecap: round;
+.time{
+margin-top:10px;
+font-size:22px;
+font-weight:500;
 }
 
-.bg {
-    stroke: #eee;
+.buttons{
+margin-top:20px;
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+justify-content:center;
 }
 
-.progress {
-    stroke: #9be7c4;
-    stroke-dasharray: 440;
-    stroke-dashoffset: 440;
-    transition: stroke-dashoffset 1s linear;
+button{
+padding:10px 14px;
+border:none;
+border-radius:16px;
+background:var(--accent);
+cursor:pointer;
+font-size:14px;
+transition:0.3s;
 }
 
-.time-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 18px;
-    color: #666;
+button:hover{
+transform:scale(1.05);
+}
+
+select{
+margin-top:15px;
+padding:8px;
+border-radius:12px;
+border:none;
+background:var(--bg2);
+color:var(--text);
+}
+
+.controls{
+margin-top:15px;
+display:flex;
+justify-content:center;
+gap:10px;
+}
+
+.stop{
+background:#ff8f8f;
+}
+
+.mode{
+position:absolute;
+top:15px;
+right:15px;
+font-size:18px;
+cursor:pointer;
+}
+
+@media(max-width:420px){
+.circle-wrapper{
+width:200px;
+height:200px;
+}
 }
 </style>
 </head>
 
 <body>
 
+<div class="mode" onclick="toggleMode()">🌙</div>
+
 <div class="container">
-    <h1>Mon Réveil 🌸</h1>
 
-    <div class="buttons">
-        <button onclick="startTimer(5)">5 min</button>
-        <button onclick="startTimer(15)">15 min</button>
-        <button onclick="startTimer(20)">20 min</button>
-        <button onclick="startTimer(30)">30 min</button>
-    </div>
+<div class="circle-wrapper">
+<svg width="240" height="240">
+<circle class="bg" cx="120" cy="120" r="110"></circle>
+<circle class="progress" cx="120" cy="120" r="110"></circle>
+</svg>
+<div class="center-flower" id="flower">🌸</div>
+</div>
 
-    <div class="custom-input">
-        <input type="number" id="customTime" placeholder="min">
-        <button class="start-btn" onclick="startCustom()">OK</button>
-    </div>
+<div class="time" id="timeDisplay">00:00</div>
 
-    <div class="circle-container">
-        <svg width="150" height="150">
-            <circle class="bg" cx="75" cy="75" r="70"></circle>
-            <circle class="progress" cx="75" cy="75" r="70"></circle>
-        </svg>
-        <div class="time-text" id="timeDisplay">--:--</div>
-    </div>
+<div class="buttons">
+<button onclick="startTimer(5)">5m</button>
+<button onclick="startTimer(15)">15m</button>
+<button onclick="startTimer(20)">20m</button>
+<button onclick="startTimer(30)">30m</button>
+<button onclick="customTime()">+</button>
+</div>
+
+<select id="soundSelect">
+<option value="bell">Cloche douce</option>
+<option value="forest">Forêt</option>
+<option value="chime">Carillon</option>
+</select>
+
+<div class="controls">
+<button class="stop" onclick="stopTimer()">Stop</button>
+</div>
+
 </div>
 
 <script>
-let timerInterval;
-let totalTime = 0;
-let remainingTime = 0;
-let audioCtx;
+let totalTime=0;
+let remainingTime=0;
+let interval;
+let audio;
 
-function startCustom() {
-    const value = parseInt(document.getElementById("customTime").value);
-    if (value > 0) {
-        startTimer(value);
-    }
+function startTimer(minutes){
+clearInterval(interval);
+remainingTime=minutes*60;
+totalTime=remainingTime;
+update();
+
+interval=setInterval(()=>{
+remainingTime--;
+update();
+if(remainingTime<=0){
+clearInterval(interval);
+finishAnimation();
+playSound();
+}
+},1000);
 }
 
-function startTimer(minutes) {
-    clearInterval(timerInterval);
-
-    totalTime = minutes * 60;
-    remainingTime = totalTime;
-
-    updateDisplay();
-    updateCircle();
-
-    timerInterval = setInterval(() => {
-        remainingTime--;
-        updateDisplay();
-        updateCircle();
-
-        if (remainingTime <= 0) {
-            clearInterval(timerInterval);
-            playSound();
-        }
-    }, 1000);
+function stopTimer(){
+clearInterval(interval);
+if(audio){audio.pause();}
+remainingTime=0;
+update();
 }
 
-function updateDisplay() {
-    let min = Math.floor(remainingTime / 60);
-    let sec = remainingTime % 60;
-    document.getElementById("timeDisplay").textContent =
-        `${min.toString().padStart(2,"0")}:${sec.toString().padStart(2,"0")}`;
+function customTime(){
+let m=prompt("Minutes ?");
+if(m>0){startTimer(parseInt(m));}
 }
 
-function updateCircle() {
-    const circle = document.querySelector(".progress");
-    const circumference = 440;
-    const progress = remainingTime / totalTime;
-    circle.style.strokeDashoffset = circumference * (1 - progress);
+function update(){
+let min=Math.floor(remainingTime/60);
+let sec=remainingTime%60;
+document.getElementById("timeDisplay").textContent=
+`${String(min).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
+
+let circle=document.querySelector(".progress");
+let circumference=690;
+let progress=remainingTime/totalTime;
+circle.style.strokeDashoffset=circumference*(1-progress);
 }
 
-function playSound() {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
+function playSound(){
+let type=document.getElementById("soundSelect").value;
+audio=new Audio(type+".mp3");
+audio.play();
+setTimeout(()=>{audio.pause();},10000);
+}
 
-    oscillator.type = "sine";
-    oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
-    gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+function finishAnimation(){
+document.getElementById("flower").classList.add("animate");
+setTimeout(()=>{
+document.getElementById("flower").classList.remove("animate");
+},4000);
+}
 
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
+function toggleMode(){
+document.body.classList.toggle("dark");
+}
+</script>
 
-    oscillator.start();
-
-    setTimeout(() => {
-        oscillator.stop();
-        audioCtx.close();
-    }, 10000);
+<script>
+if("serviceWorker" in navigator){
+navigator.serviceWorker.register("sw.js");
 }
 </script>
 
