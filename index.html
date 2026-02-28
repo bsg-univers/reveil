@@ -3,124 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Réveil Pastel</title>
+    <title>Mon Réveil Pastel Dynamique</title>
     <style>
         :root {
-            --bg-color: #f0f4f8;
-            --accent-color: #a8dadc;
-            --text-color: #457b9d;
-            --button-hover: #f1faee;
-            --circle-bg: #e1eaf2;
+            --bg-color: #f8f9fa;
+            --accent-color: #b8e0d2; /* Menthe pastel */
+            --text-color: #5b7065;
+            --delete-color: #eac4d5; /* Rose pastel */
+            --circle-bg: #e9ecef;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
+            padding: 20px;
         }
 
-        h1 { font-weight: 300; margin-bottom: 30px; }
-
-        /* Conteneur du cercle */
+        /* Cercle de progression */
         .timer-container {
             position: relative;
-            width: 250px;
-            height: 250px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 40px;
+            width: 200px;
+            height: 200px;
+            margin-bottom: 30px;
         }
 
-        svg {
-            transform: rotate(-90deg);
-            width: 100%;
-            height: 100%;
-        }
-
-        circle {
-            fill: none;
-            stroke-width: 8;
-            stroke-linecap: round;
-        }
-
+        svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+        circle { fill: none; stroke-width: 10; stroke-linecap: round; }
         .circle-bg { stroke: var(--circle-bg); }
-        
         .circle-progress {
             stroke: var(--accent-color);
-            stroke-dasharray: 754; /* 2 * PI * R (R=120) */
-            stroke-dashoffset: 754;
+            stroke-dasharray: 565; /* 2 * PI * 90 */
+            stroke-dashoffset: 565;
             transition: stroke-dashoffset 1s linear;
         }
 
         .time-display {
             position: absolute;
-            font-size: 2.5rem;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            font-weight: 300;
+        }
+
+        /* Section Ajout */
+        .controls {
+            margin-bottom: 30px;
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            padding: 10px;
+            border: 2px solid var(--accent-color);
+            border-radius: 12px;
+            outline: none;
+            width: 80px;
+            text-align: center;
+        }
+
+        .btn-add {
+            background-color: var(--accent-color);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            color: white;
             font-weight: bold;
         }
 
-        /* Boutons */
-        .options {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+        /* Liste des options */
+        .options-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            max-width: 400px;
         }
 
-        button {
-            padding: 15px 25px;
-            border: 2px solid var(--accent-color);
+        .timer-btn-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .timer-btn {
+            padding: 12px 20px;
             background: white;
-            color: var(--text-color);
-            border-radius: 20px;
+            border: 2px solid var(--accent-color);
+            border-radius: 15px;
             cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.3s ease;
+            color: var(--text-color);
+            transition: 0.3s;
         }
 
-        button:hover {
-            background-color: var(--accent-color);
+        .timer-btn:hover { background: var(--accent-color); color: white; }
+
+        .btn-delete {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--delete-color);
             color: white;
-        }
-
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
 <body>
 
-    <h1>Douce Alerte</h1>
-
     <div class="timer-container">
-        <svg>
-            <circle class="circle-bg" cx="125" cy="125" r="120"></circle>
-            <circle class="circle-progress" id="progress" cx="125" cy="125" r="120"></circle>
+        <svg viewBox="0 0 200 200">
+            <circle class="circle-bg" cx="100" cy="100" r="90"></circle>
+            <circle class="circle-progress" id="progress" cx="100" cy="100" r="90"></circle>
         </svg>
         <div class="time-display" id="display">00:00</div>
     </div>
 
-    <div class="options">
-        <button onclick="startTimer(10)">10 Min</button>
-        <button onclick="startTimer(15)">15 Min</button>
-        <button onclick="startTimer(20)">20 Min</button>
-        <button onclick="startTimer(30)">30 Min</button>
+    <div class="controls">
+        <input type="number" id="custom-min" placeholder="Min" min="1">
+        <button class="btn-add" onclick="addNewOption()">Ajouter</button>
     </div>
+
+    <div class="options-grid" id="options-container">
+        </div>
 
     <audio id="alarm-sound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
 
     <script>
         let countdown;
-        const display = document.getElementById('display');
+        const container = document.getElementById('options-container');
         const progressCircle = document.getElementById('progress');
+        const display = document.getElementById('display');
         const alarm = document.getElementById('alarm-sound');
-        const totalDash = 754;
+        const totalDash = 565;
+
+        // Options par défaut au chargement
+        let timerOptions = [10, 15, 20, 30];
+
+        function renderButtons() {
+            container.innerHTML = '';
+            timerOptions.forEach((min, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'timer-btn-wrapper';
+                wrapper.innerHTML = `
+                    <button class="timer-btn" onclick="startTimer(${min})">${min} min</button>
+                    <button class="btn-delete" onclick="removeOption(${index})">×</button>
+                `;
+                container.appendChild(wrapper);
+            });
+        }
+
+        function addNewOption() {
+            const input = document.getElementById('custom-min');
+            const val = parseInt(input.value);
+            if (val > 0) {
+                timerOptions.push(val);
+                timerOptions.sort((a, b) => a - b); // Trie par ordre croissant
+                renderButtons();
+                input.value = '';
+            }
+        }
+
+        function removeOption(index) {
+            timerOptions.splice(index, 1);
+            renderButtons();
+        }
 
         function startTimer(minutes) {
             clearInterval(countdown);
@@ -128,21 +188,18 @@
             alarm.currentTime = 0;
 
             const seconds = minutes * 60;
-            const now = Date.now();
-            const then = now + seconds * 1000;
+            const then = Date.now() + seconds * 1000;
 
             updateDisplay(seconds);
             updateCircle(1);
 
             countdown = setInterval(() => {
                 const secondsLeft = Math.round((then - Date.now()) / 1000);
-
                 if (secondsLeft < 0) {
                     clearInterval(countdown);
                     playAlarm();
                     return;
                 }
-
                 updateDisplay(secondsLeft);
                 updateCircle(secondsLeft / seconds);
             }, 1000);
@@ -150,23 +207,21 @@
 
         function updateDisplay(seconds) {
             const mins = Math.floor(seconds / 60);
-            const remainderSeconds = seconds % 60;
-            display.textContent = `${mins}:${remainderSeconds < 10 ? '0' : ''}${remainderSeconds}`;
+            const remainder = seconds % 60;
+            display.textContent = `${mins}:${remainder < 10 ? '0' : ''}${remainder}`;
         }
 
         function updateCircle(percent) {
-            const offset = totalDash - (percent * totalDash);
-            progressCircle.style.strokeDashoffset = offset;
+            progressCircle.style.strokeDashoffset = totalDash - (percent * totalDash);
         }
 
         function playAlarm() {
             alarm.play();
-            // Arrête le son après 10 secondes
-            setTimeout(() => {
-                alarm.pause();
-                alarm.currentTime = 0;
-            }, 10000);
+            setTimeout(() => { alarm.pause(); alarm.currentTime = 0; }, 10000);
         }
+
+        // Initialisation
+        renderButtons();
     </script>
 </body>
 </html>
