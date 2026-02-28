@@ -163,7 +163,7 @@
 
     <div class="options-grid" id="options-container"></div>
 
-    <audio id="alarm-sound" loop src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
+    <audio id="alarm-sound" loop src="https://assets.mixkit.co/active_storage/sfx/2550/2550-preview.mp3"></audio>
 
     <script>
         let countdown;
@@ -239,26 +239,39 @@
             progressCircle.style.strokeDashoffset = totalDash - (percent * totalDash);
         }
 
-        function playAlarm() {
-            alarm.play();
-            document.querySelector('.timer-container').classList.add('ringing');
-            hint.textContent = "Cliquer pour arrêter";
-            
-            // Arrêt automatique après 10 secondes
-            alarmTimeout = setTimeout(() => {
-                stopAlarm();
-            }, 10000);
-        }
+function playAlarm() {
+        alarm.volume = 1; // Volume max au début
+        alarm.play();
+        document.querySelector('.timer-container').classList.add('ringing');
+        hint.textContent = "Cliquer pour arrêter";
+        
+        // Arrêt automatique après 10 secondes
+        alarmTimeout = setTimeout(() => {
+            fadeOutAndStop();
+        }, 10000);
+    }
 
-        function stopAlarm() {
-            alarm.pause();
-            alarm.currentTime = 0;
-            clearTimeout(alarmTimeout);
-            document.querySelector('.timer-container').classList.remove('ringing');
-            hint.textContent = "";
+    function stopAlarm() {
+        if (!alarm.paused) {
+            fadeOutAndStop();
         }
+    }
 
-        renderButtons();
+    // Fonction pour un arrêt tout doux du son
+    function fadeOutAndStop() {
+        let fadeAudio = setInterval(() => {
+            if (alarm.volume > 0.1) {
+                alarm.volume -= 0.1;
+            } else {
+                clearInterval(fadeAudio);
+                alarm.pause();
+                alarm.currentTime = 0;
+                alarm.volume = 1; // On remet le volume à 1 pour la prochaine fois
+                document.querySelector('.timer-container').classList.remove('ringing');
+                hint.textContent = "";
+            }
+        }, 100); // Baisse le son tous les 100ms
+    }
     </script>
 </body>
 </html>
