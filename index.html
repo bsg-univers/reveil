@@ -283,31 +283,62 @@ circle.style.strokeDashoffset=circumference*(1-progress);
 
 function playSound(){
 
-const type=document.getElementById("soundSelect").value;
-const volumeTarget=parseFloat(document.getElementById("volumeControl").value);
+const type = document.getElementById("soundSelect").value;
+const volumeTarget = parseFloat(document.getElementById("volumeControl").value);
 
-audio=new Audio(type+".wav");
-audio.volume=0;
-audio.loop=true;
+audio = new Audio(type + ".wav");
+audio.volume = 0;
+audio.loop = true;
 
 audio.play().catch(err=>{
-console.log("Erreur audio :",err);
+console.log("Erreur audio :", err);
 });
 
-let vol=0;
+let vol = 0;
 
-let fade=setInterval(()=>{
+/* fade-in */
+let fadeIn = setInterval(()=>{
 
-vol+=0.02;
+vol += 0.02;
 
-if(vol>=volumeTarget){
-vol=volumeTarget;
-clearInterval(fade);
+if(vol >= volumeTarget){
+vol = volumeTarget;
+clearInterval(fadeIn);
 }
 
-audio.volume=vol;
+audio.volume = vol;
 
 },120);
+
+
+/* fade-out après 17 secondes */
+setTimeout(()=>{
+
+let fadeOut = setInterval(()=>{
+
+vol -= 0.03;
+
+if(vol <= 0){
+vol = 0;
+clearInterval(fadeOut);
+}
+
+audio.volume = vol;
+
+},100);
+
+},17000);
+
+
+/* arrêt complet après 20 secondes */
+setTimeout(()=>{
+
+if(audio){
+audio.pause();
+audio.currentTime = 0;
+}
+
+},20000);
 
 }
 
