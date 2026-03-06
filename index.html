@@ -212,26 +212,35 @@ let interval;
 let audio;
 
 async function loadSounds() {
+
     try {
+
         const response = await fetch("sounds.json");
         const data = await response.json();
         const select = document.getElementById("soundSelect");
 
-        data.sounds.forEach(file => {
+        data.sounds.forEach((file, index) => {
+
             const option = document.createElement("option");
 
             option.value = file;
-
-            // Nom affiché = nom du fichier sans extension
-            const displayName = file.replace(/\.[^/.]+$/, "");
-            option.textContent = displayName;
+            option.textContent = file.replace(/\.[^/.]+$/, "");
 
             select.appendChild(option);
+
+            // sélectionner le premier son automatiquement
+            if(index === 0){
+                select.value = file;
+            }
+
         });
 
     } catch (error) {
+
         console.error("Erreur chargement sons :", error);
+
     }
+
 }
 
 loadSounds();
@@ -307,6 +316,11 @@ function playSound(){
 const volumeTarget = parseFloat(document.getElementById("volumeControl").value);
 
 const file = document.getElementById("soundSelect").value;
+
+if(!file){
+console.warn("Aucun son sélectionné");
+return;
+}
 audio = new Audio("sounds/" + file);
   
 audio.volume = 0;
