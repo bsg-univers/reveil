@@ -1,1 +1,8 @@
 
+{
+  "sounds": [
+    "waves.wav",
+    "forest.wav",
+    "bell.wav"
+  ]
+}
