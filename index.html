@@ -191,11 +191,7 @@ height:200px;
 <button onclick="customTime()">+</button>
 </div>
 
-<select id="soundSelect">
-<option value="bell">Cloche douce</option>
-<option value="forest">Forêt</option>
-<option value="chime">Carillon</option>
-</select>
+<select id="soundSelect"></select>
 
 <div>
 <label>Volume</label><br>
@@ -214,6 +210,31 @@ let totalTime=0;
 let remainingTime=0;
 let interval;
 let audio;
+
+async function loadSounds() {
+    try {
+        const response = await fetch("sounds.json");
+        const data = await response.json();
+        const select = document.getElementById("soundSelect");
+
+        data.sounds.forEach(file => {
+            const option = document.createElement("option");
+
+            option.value = file;
+
+            // Nom affiché = nom du fichier sans extension
+            const displayName = file.replace(/\.[^/.]+$/, "");
+            option.textContent = displayName;
+
+            select.appendChild(option);
+        });
+
+    } catch (error) {
+        console.error("Erreur chargement sons :", error);
+    }
+}
+
+loadSounds();
 
 function startTimer(minutes){
 
@@ -283,10 +304,11 @@ circle.style.strokeDashoffset=circumference*(1-progress);
 
 function playSound(){
 
-const type = document.getElementById("soundSelect").value;
 const volumeTarget = parseFloat(document.getElementById("volumeControl").value);
 
-audio = new Audio(type + ".wav");
+const file = document.getElementById("soundSelect").value;
+audio = new Audio("sounds/" + file);
+  
 audio.volume = 0;
 audio.loop = true;
 
