@@ -210,6 +210,8 @@ let totalTime=0;
 let remainingTime=0;
 let interval;
 let audio;
+let timerQueue = [];
+let currentIndex = 0;
 
 async function loadSounds() {
 
@@ -247,23 +249,45 @@ loadSounds();
 
 function startTimer(minutes){
 
+    // si on clique plusieurs fois → on empile les durées
+    timerQueue.push(minutes);
+    
+    // si un timer tourne déjà, on ne redémarre pas
+    if(interval) return;
+    
+    currentIndex = 0;
+    launchNextTimer();
+
+}
+
+function launchNextTimer(){
+
+if(currentIndex >= timerQueue.length){
+timerQueue = [];
+return;
+}
+
 clearInterval(interval);
 
-remainingTime=minutes*60;
-totalTime=remainingTime;
+remainingTime = timerQueue[currentIndex] * 60;
+totalTime = remainingTime;
 
 update();
 
-interval=setInterval(()=>{
+interval = setInterval(()=>{
 
 remainingTime--;
 update();
+growFlower();
 
-if(remainingTime<=0){
+if(remainingTime <= 0){
 
 clearInterval(interval);
 finishAnimation();
 playSound();
+
+currentIndex++;
+setTimeout(launchNextTimer, 3000); // pause de 3 sec entre les sonneries
 
 }
 
@@ -271,6 +295,59 @@ playSound();
 
 }
 
+function launchNextTimer(){
+
+if(currentIndex >= timerQueue.length){
+timerQueue = [];
+return;
+}
+
+clearInterval(interval);
+
+remainingTime = timerQueue[currentIndex] * 60;
+totalTime = remainingTime;
+
+update();
+
+interval = setInterval(()=>{
+
+remainingTime--;
+update();
+growFlower();
+
+if(remainingTime <= 0){
+
+clearInterval(interval);
+finishAnimation();
+playSound();
+
+currentIndex++;
+setTimeout(launchNextTimer, 3000); // pause de 3 sec entre les sonneries
+
+}
+
+},1000);
+
+}
+
+function growFlower(){
+
+let progress = 1 - (remainingTime / totalTime);
+
+/* taille entre 0.6 et 1.8 */
+let scale = 0.6 + progress * 1.2;
+
+/* opacité progressive */
+let opacity = 0.2 + progress * 0.6;
+
+let flower = document.getElementById("flower");
+
+flower.style.transform = `translate(-50%,-50%) scale(${scale})`;
+flower.style.opacity = opacity;
+
+}
+
+    
 function stopTimer(){
 
 clearInterval(interval);
@@ -305,7 +382,7 @@ document.getElementById("timeDisplay").textContent=
 
 let circle=document.querySelector(".progress");
 let circumference=690;
-let progress=remainingTime/totalTime;
+let progress = 1 - (remainingTime/totalTime);
 
 circle.style.strokeDashoffset=circumference*(1-progress);
 
